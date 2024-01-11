@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chacha Chaudhary Chat Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #292b2c; /* Dark background color */
+            color: #ffffff; /* Text color */
+        }
+
+        header {
+            background-color: #222; /* Darker background color for header */
+            padding: 10px;
+            text-align: center;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #333; /* Container background color */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #ffcc00; /* Radium color */
+            text-align: center;
+        }
+
+        form {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        label {
+            color: #00cc00; /* Green color for label */
+            margin-right: 10px;
+        }
+
+        #user_input {
+            color: #00cc00; /* Green color for user input text */
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #00cc00;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #00cc00; /* Green color for the button */
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .history-button {
+            background-color: #222; /* Dark background color for history button */
+            color: #fff;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .chat-message {
+            margin-bottom: 20px;
+        }
+
+        .user-message, .chacha-message {
+            background-color: #444; /* Dark background color for messages */
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 0 5px rgba(0, 204, 0, 0.5);
+        }
+
+        .user-message {
+            color: #00cc00; /* Green color for user message text */
+        }
+
+        .chacha-message {
+            color: #3399ff; /* Blue color for Chacha's message text */
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .history-container {
+            max-width: 200px;
+            margin: 20px 0 0 20px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .history-container a {
+            color: #ffcc00;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .history-container a:hover {
+            text-decoration: underline;
+        }
+
+        .search-tab {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+            margin-left: 250px; /* Adjust this value based on your layout */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Chacha Chaudhary Chat</h1>
+    </header>
+    <div class="history-container" id="historyContainer">
+        <h2>History</h2>
+        <!-- Replace the following with dynamic data from the server -->
+        <a href="#" onclick="showAnswer('How are you?')">How are you?</a>
+        <a href="#" onclick="showAnswer('What is your name?')">What is your name?</a>
+        <a href="#" onclick="showAnswer('Tell me a joke')">Tell me a joke</a>
+    </div>
+    <div class="chat-container" id="chatContainer">
+        <form action="/chat" method="post">
+            <label for="user_input">User Input:</label>
+            <input type="text" id="user_input" name="user_input" required>
+            <button type="submit">Chat</button>
+            <button type="button" class="history-button" onclick="toggleHistory()">History</button>
+        </form>
+
+        {% if chat_history %}
+            {% for entry in chat_history %}
+                <div class="chat-message">
+                    <div class="user-message">
+                        <p><strong>User:</strong> {{ entry.user_input }}</p>
+                    </div>
+                    <div class="chacha-message">
+                        <p><strong>Chacha:</strong> {{ entry.chacha_response }}</p>
+                        {% if entry.image_url %}
+                            <img src="{{ entry.image_url }}" alt="Generated Image">
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="search-tab" id="searchTab">
+        <!-- This is where the answer and image will be displayed -->
+    </div>
+
+    <script>
+        function toggleHistory() {
+            var historyContainer = document.getElementById('historyContainer');
+            historyContainer.style.display = (historyContainer.style.display === 'none' || historyContainer.style.display === '') ? 'block' : 'none';
+        }
+
+        function showAnswer(question) {
+            // Assuming you have a function to retrieve the answer and image based on the question
+            // Update the content in the search tab
+            var searchTab = document.getElementById('searchTab');
+            searchTab.innerHTML = '<h3>Answer for: ' + question + '</h3>' +
+                '<p>Answer: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>' +
+                '<img src="https://placekitten.com/300/200" alt="Generated Image">';
+        }
+    </script>
+</body>
+</html>
