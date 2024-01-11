@@ -1,0 +1,94 @@
+from flask import Flask, render_template, request
+from flask_sqlalchemy import SQLAlchemy
+import openai
+import time
+import pyttsx3
+
+app = Flask(_name_)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chatbot.db'
+db = SQLAlchemy(app)
+openai.api_key = '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'
+
+class ChatHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_input = db.Column(db.String(255))
+    chacha_response = db.Column(db.String(255))
+    image_url = db.Column(db.String(255))
+
+def chat_with_chacha(user_input):
+    # Your existing chat_with_chacha function
+    restricted_keywords = ['rivers', 'river', 'namami gange', 'Hi', 'Bye', 'namami ganga plan', 'namami ganga', 'chacha chaudhary', 'ganga', 'river conservation', 'namami ganga project']
+    if any(keyword.lower() in user_input.lower() for keyword in restricted_keywords):
+        retries = 3
+        for _ in range(retries):
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": user_input},
+                    ]
+                )
+                return response['choices'][0]['message']['content']
+            except openai.error.RateLimitError as e:
+                time.sleep(5)
+        raise Exception("Exceeded rate limits even after retries.")
+    else:
+        return "Sorry, I can't access this type of information which is not related to this project."
+
+def generate_image_url(user_input):
+    # Your existing generate_image_url function
+    try:
+        image = openai.Image.create(
+            prompt=user_input,
+            n=1,
+            size="256x256"
+        )
+        return image['data'][0]['url']
+    except openai.error.OpenAIError as e:
+        return f"Error generating image: {str(e)}"
+
+def speak(text, max_words=150):
+    # Your existing speak function
+    words = text.split()[:max_words]
+    truncated_text = ' '.join(words)
+
+    engine = pyttsx3.init()
+    engine.say(truncated_text)
+    engine.runAndWait()
+
+@app.route('/')
+def chat_page():
+    # Retrieve all conversation history from the database
+    all_history = ChatHistory.query.all()
+    return render_template('index.html', chat_history=all_history)
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_input = request.form['user_input']
+    response = chat_with_chacha(user_input)
+
+    k = user_input.split()
+    images = ['rivers', 'river', 'namami gange', 'namami ganga plan', 'namami ganga', 'chacha chaudhary', 'ganga','river conservation']
+    image_url = None
+    for i in k:
+        if i in images:
+            image_url = generate_image_url(user_input)
+
+    # Save the conversation to the database
+    save_to_database(user_input, response, image_url)
+
+    # Retrieve all conversation history from the database
+    all_history = ChatHistory.query.all()
+
+    return render_template('index.html', user_input=user_input, chacha_response=response, image_url=image_url, chat_history=all_history)
+
+def save_to_database(user_input, chacha_response, image_url):
+    chat_history = ChatHistory(user_input=user_input, chacha_response=chacha_response, image_url=image_url)
+    db.session.add(chat_history)
+    db.session.commit()
+
+if _name_ == '_main_':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
